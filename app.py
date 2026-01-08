@@ -219,13 +219,5 @@ if query := st.chat_input("Ask anything about the MBE program documents..."):
                     remaining -= 1
                 countdown.success("✅ You can now send a new question.")
 
-            if used_chunks:
-                st.markdown("### 📚 Answer was based on the following document excerpts:")
-                for i, ch in enumerate(used_chunks, 1):
-                    chunk_type = ch.get("type", "text")
-                    icon = "📊" if chunk_type == "table_page" else "📄"
-                    with st.expander(f"{icon} {ch['source']} — Page {ch['page']}"):
-                        st.markdown(ch["content"])
-
     chat["messages"].append({"role": "assistant", "content": answer})
     chat["context"] = used_chunks if used_chunks else []
