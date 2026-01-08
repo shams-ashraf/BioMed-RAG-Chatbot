@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 CACHE_FOLDER = os.getenv("CACHE_FOLDER", "./cache")
 DOCS_FOLDER ="/mount/chatjdjfh/documents"
-TESSDATA_PATH = os.getenv("TESSDATA_PATH")
+TESSERACT_PATH = os.getenv("TESSERACT_PATH")
 PDF_PASSWORD = os.getenv("PDF_PASSWORD", "mbe2025")
 
 pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
@@ -550,3 +550,4 @@ def extract_pdf_detailed(pdf_path: str):
             fitz_doc.close()
 
         return None, str(e)
+
