@@ -11,6 +11,7 @@ from collections import Counter
 from semantic_text_splitter import TextSplitter
 from tokenizers import Tokenizer
 from dotenv import load_dotenv
+import glob
 
 load_dotenv()
 CACHE_FOLDER = os.getenv("CACHE_FOLDER", "./cache")
@@ -30,11 +31,7 @@ splitter = TextSplitter.from_huggingface_tokenizer(
 )
 
 def get_files_from_folder():
-    files = []
-    for f in os.listdir(DOCS_FOLDER):
-        if f.lower().endswith(".pdf"):
-            files.append(os.path.join(DOCS_FOLDER, f))
-    return files
+    return glob.glob(os.path.join(DOCS_FOLDER, "*.[pP][dD][fF]"))
 
 def get_file_hash(filepath: str) -> str:
     with open(filepath, "rb") as f:
@@ -550,4 +547,5 @@ def extract_pdf_detailed(pdf_path: str):
             fitz_doc.close()
 
         return None, str(e)
+
 
