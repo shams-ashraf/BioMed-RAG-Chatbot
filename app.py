@@ -1,3 +1,6 @@
+# This is the main Streamlit app that runs the chatbot UI
+# Flow: User opens app → loads existing ChromaDB → user asks question → answer_question() → display result
+
 import streamlit as st
 import uuid
 import chromadb
@@ -5,16 +8,10 @@ import os
 import re
 import time
 from styles import load_custom_css
+from chromadb.utils import embedding_functions
+from API import answer_question
 
-from DocumentProcessor import (
-    get_files_from_folder,
-    get_file_hash,
-    load_cache,
-    extract_pdf_detailed,
-    save_cache
-)
-from ChatEngine import get_embedding_function, answer_question_with_groq
-
+# Configure Streamlit page
 st.set_page_config(
     page_title="Biomedical Document Chatbot",
     page_icon="🧬",
@@ -24,112 +21,59 @@ st.set_page_config(
 
 load_custom_css()
 
-DOCS_FOLDER = "/mount/src/chatjdjfh/documents"
-CACHE_FOLDER = os.getenv("CACHE_FOLDER", "./cache")
+# Folder paths
 CHROMA_FOLDER = "./chroma_db"
 
-os.makedirs(DOCS_FOLDER, exist_ok=True)
-os.makedirs(CACHE_FOLDER, exist_ok=True)
+# Create folder if it doesn't exist
 os.makedirs(CHROMA_FOLDER, exist_ok=True)
 
+# Get embedding function for ChromaDB
+def get_embedding_function():
+    return embedding_functions.SentenceTransformerEmbeddingFunction(
+        model_name="intfloat/multilingual-e5-large"
+    )
+
+# Initialize session state
 if "collection" not in st.session_state:
     st.session_state.collection = None
-
 if "chats" not in st.session_state:
     st.session_state.chats = {}
     st.session_state.active_chat = None
 
-if "user_language" not in st.session_state:
-    st.session_state.user_language = "en"
+###########################################################################
+# LOAD EXISTING CHROMADB
+###########################################################################
 
-client = chromadb.PersistentClient(path=CHROMA_FOLDER)  
-
-collections = client.list_collections()
-
-if collections:
-    collection = client.get_collection(
-        name=collections[0].name,
-        embedding_function=get_embedding_function()
-    )
-    st.session_state.collection = collection
-else:
-    with st.spinner("Processing documents... This may take a while for the first time."):
-        files = get_files_from_folder()
-        st.write("🔎 Searching for documents in:")
-        st.code(DOCS_FOLDER)
-        st.write(f"Found {len(files)} files:")
-        if files:
-            for f in files:
-                st.write(f"- {f}")
-        else:
-            st.error("No files found! Check the folder path and file extensions.")
-            st.stop()
-        if not files:
-            st.error("No documents found in the documents folder!")
-            st.stop()
-
-        collection = client.create_collection(
-            name="biomed_docs1",
-            embedding_function=get_embedding_function(),
-            metadata={"hnsw:space": "cosine"}  
+try:
+    client = chromadb.PersistentClient(path=CHROMA_FOLDER)
+    collections = client.list_collections()
+    
+    if collections:
+        # Load existing collection
+        collection = client.get_collection(
+            name=collections[0].name,
+            embedding_function=get_embedding_function()
         )
-
-        all_chunks = []
-        all_meta = {}
-        all_ids = []
-
-        processed_files = []  
-        processed_count = 0  
-
-        for idx, path in enumerate(files):
-            name = os.path.basename(path)
-            ext = name.split(".")[-1].lower()
-            key = f"{get_file_hash(path)}_{ext}"
-            cached = load_cache(key)
-
-            if cached:
-                info = cached
-                st.success(f"✅ Loaded from cache: {name}") 
-            else:
-                st.info(f"📄 Processing: {name} ...") 
-                if ext == "pdf":
-                    info, error = extract_pdf_detailed(path)
-                else:
-                    st.warning(f"⚠️ Skipped unsupported file: {name}")
-                    continue
-                if error:
-                    st.warning(f"⚠️ Error in {name}: {error}")
-                    continue
-                save_cache(key, info)
-
-            st.success(f"✅ Processed successfully: {name}")
-            processed_files.append(name)
-            processed_count += 1
-
-            for c in info["chunks"]:
-                all_chunks.append(c["content"])
-                all_meta[len(all_chunks) - 1] = c["metadata"]
-                all_ids.append(f"chunk_{idx}_{len(all_chunks)}")
-
-        if processed_count > 0:
-            st.success(f"🎉 All done! Processed {processed_count} documents successfully!")
-            st.write("**Processed documents:**")
-            for file_name in processed_files:
-                st.write(f"- {file_name}")
-        else:
-            st.error("❌ No documents were processed!")
-
-        batch_size = 300
-        for i in range(0, len(all_chunks), batch_size):
-            collection.add(
-                documents=all_chunks[i:i+batch_size],
-                metadatas=[all_meta[j] for j in range(i, min(i+batch_size, len(all_chunks)))],
-                ids=all_ids[i:i+batch_size]
-            )
-
         st.session_state.collection = collection
-        st.success(f"✅ Processed {len(files)} documents successfully!")
+        
+        # Get collection info
+        collection_count = collection.count()
+        st.success(f"✅ Loaded existing database with {collection_count} chunks")
+    else:
+        st.error("❌ No ChromaDB collection found! Please run the document processing first.")
+        st.info("💡 Make sure you have a ChromaDB in the './chroma_db' folder")
+        st.stop()
+        
+except Exception as e:
+    st.error(f"❌ Error loading ChromaDB: {str(e)}")
+    st.info("💡 Make sure the ChromaDB exists in './chroma_db' folder")
+    st.stop()
 
+###########################################################################
+# CHAT INTERFACE SECTION
+###########################################################################
+
+# Initialize first chat if none exists
 if not st.session_state.chats:
     cid = f"chat_{uuid.uuid4().hex[:6]}"
     st.session_state.chats[cid] = {
@@ -139,25 +83,34 @@ if not st.session_state.chats:
     }
     st.session_state.active_chat = cid
 
+# Display header
 st.markdown("""
-<div class="main-card">
-    <h1 style='text-align:center;margin:0;'>🧬 Biomedical Document Chatbot</h1>
+<div class="chat-header">
+    <h1>🧬 Biomedical Document Chatbot</h1>
+    <p>Answers only from official documents • Supports English & German • Remembers conversation</p>
 </div>
 
-<div class="main-card">
-    <p style="text-align:center; font-size:1.1rem;">Answers <strong>only</strong> from official documents • Supports English & German • Remembers conversation</p>
-    <h3 style="color:#00d9ff;">Try these examples:</h3>
-    <ul style="font-size:1.05rem;">
+<div class="example-questions">
+    <strong>Try these examples:</strong>
+    <ul>
         <li>What are the requirements for registering the master's thesis?</li>
         <li>Was sind die Regelungen fur die Masterarbeit?</li>
     </ul>
 </div>
 """, unsafe_allow_html=True)
 
+###########################################################################
+# SIDEBAR: Chat management
+###########################################################################
+
 with st.sidebar:
-    
     st.markdown("# 🧬 BioMed Chat")
-        
+    
+    # Database info
+    if st.session_state.collection:
+        st.info(f"📊 Database: {st.session_state.collection.count()} chunks loaded")
+    
+    # New chat button
     if st.button("➕ New Chat", use_container_width=True, type="primary"):
         cid = f"chat_{uuid.uuid4().hex[:6]}"
         st.session_state.chats[cid] = {
@@ -167,16 +120,21 @@ with st.sidebar:
         }
         st.session_state.active_chat = cid
         st.rerun()
-
+    
     st.markdown("### 💬 Your Chats")
-
-    for cid in reversed(list(st.session_state.chats.keys())):   
+    
+    # Display all chats (newest first)
+    for cid in reversed(list(st.session_state.chats.keys())):
         chat = st.session_state.chats[cid]
         col1, col2 = st.columns([4, 1])
+        
+        # Chat button
         with col1:
             if st.button(f"💬 {chat['title'][:35]}...", key=f"open_{cid}", use_container_width=True):
                 st.session_state.active_chat = cid
                 st.rerun()
+        
+        # Delete button
         with col2:
             if st.button("🗑️", key=f"del_{cid}"):
                 del st.session_state.chats[cid]
@@ -184,31 +142,44 @@ with st.sidebar:
                     st.session_state.active_chat = next(iter(st.session_state.chats), None)
                 st.rerun()
 
+###########################################################################
+# MAIN CHAT AREA
+###########################################################################
 
+# Get current chat
 chat = st.session_state.chats[st.session_state.active_chat]
+
+# Display chat history
 for m in chat["messages"]:
     with st.chat_message(m["role"]):
         st.markdown(m["content"])
 
+# Chat input
 if query := st.chat_input("Ask anything about the MBE program documents..."):
+    # Add user message
     chat["messages"].append({"role": "user", "content": query})
+    
+    # Update chat title if it's new
     if chat["title"] == "New Chat":
         chat["title"] = query[:40] + "..." if len(query) > 40 else query
-
+    
+    # Display user message
     with st.chat_message("user"):
         st.markdown(query)
-
+    
+    # Get answer
     with st.chat_message("assistant"):
         with st.spinner("🔍 Searching documents & thinking..."):
-            answer, used_chunks = answer_question_with_groq(
-                query, 
+            # Call answer function
+            answer, used_chunks = answer_question(
+                query,
                 chat["messages"],
-                user_language=st.session_state.user_language,
                 collection=st.session_state.collection
             )
             
             st.markdown(answer, unsafe_allow_html=True)
-
+            
+            # Handle rate limit countdown
             match = re.search(r'wait (\d+) seconds', answer.lower())
             if match:
                 remaining = int(match.group(1))
@@ -218,6 +189,7 @@ if query := st.chat_input("Ask anything about the MBE program documents..."):
                     time.sleep(1)
                     remaining -= 1
                 countdown.success("✅ You can now send a new question.")
-
+    
+    # Add assistant message
     chat["messages"].append({"role": "assistant", "content": answer})
     chat["context"] = used_chunks if used_chunks else []
