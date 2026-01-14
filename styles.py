@@ -102,27 +102,6 @@ def load_custom_css():
     .assistant-message .message-header {
         color: #48bb78;
     }
-
-    .stTextInput input {
-        background: rgb(10 144 168 / 50%);
-        border: 2px solid #0ba4be;
-        border-radius: 15px;
-        color: #ffffff;
-        padding: 1.5rem 1.2rem;
-        font-size: 1.15rem;
-        transition: all 0.3s;
-    }
-
-    .stTextInput input::placeholder {
-        color: #ffffff;
-        opacity: 0.8;
-    }
-
-    .stTextInput input:focus {
-        border-color: #00e5ff;
-        box-shadow: 0 0 25px rgba(0, 217, 255, 0.7);
-        background: rgba(0, 217, 255, 0.6);
-    }
     
     .stTextArea textarea {
         background: rgb(10 144 168 / 50%);
@@ -366,4 +345,5 @@ def load_custom_css():
         color: #ffffff !important;
     }
     </style>
+
     """, unsafe_allow_html=True)
