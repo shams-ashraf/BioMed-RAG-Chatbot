@@ -102,29 +102,6 @@ def load_custom_css():
     .assistant-message .message-header {
         color: #48bb78;
     }
-    
-    .stTextArea textarea {
-        background: rgb(10 144 168 / 50%);
-        border: 2px solid #0ba4be;
-        border-radius: 15px;
-        color: #ffffff;
-        padding: 1.2rem;
-        font-size: 1.05rem;
-        transition: all 0.3s;
-        min-height: 80px;
-    }
-
-    .stTextArea textarea::placeholder {
-        color: #ffffff;
-        opacity: 0.8;
-    }
-
-    .stTextArea textarea:focus {
-        border-color: #00e5ff;
-        box-shadow: 0 0 25px rgba(0, 217, 255, 0.7);
-        background: rgba(0, 217, 255, 0.6);
-    }
-    
     .file-badge {
         display: inline-block;
         background: linear-gradient(90deg, #10b981 0%, #059669 100%);
@@ -347,3 +324,4 @@ def load_custom_css():
     </style>
 
     """, unsafe_allow_html=True)
+
