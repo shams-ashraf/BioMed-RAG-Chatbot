@@ -14,11 +14,17 @@ An AI-powered document-based chatbot built using Retrieval-Augmented Generation 
 ✨ Features
 ---
 Answers are grounded strictly in document content (no hallucination)
+
 Supports both unstructured text and structured table data
+
 Iterative retrieval pipeline for improved answer accuracy
+
 Context expansion using nearby document sections
+
 Source tracking to avoid redundant retrieval
+
 Efficient context management within token limits
+
 Real-time interaction using Streamlit interface
 
 ---
@@ -57,9 +63,13 @@ Robust error handling:
 ----
 
 Python
+
 Streamlit
+
 ChromaDB
+
 OpenAI API (or LLM API)
+
 NLP / Embeddings
 
 ---
@@ -67,10 +77,15 @@ NLP / Embeddings
 ---
 .
 ├── app.py
+
 ├── API.py
+
 ├── chat_engine/
+
 ├── chroma_db/
+
 ├── styles.py
+
 ├── requirements.txt
 
 ---
@@ -78,6 +93,7 @@ NLP / Embeddings
 ---
 
 pip install -r requirements.txt
+
 streamlit run app.py
 
 ---
