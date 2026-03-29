@@ -25,13 +25,14 @@ Real-time interaction using Streamlit interface
 🧠 Technical Highlights
 ---
 Semantic search using embeddings (ChromaDB)
+
 Separate pipelines for text and table processing
 Iterative retrieval strategy:
-Retrieve relevant chunks
-Dynamically build context
-Query LLM
-Evaluate completeness
-Refine results if needed
+    Retrieve relevant chunks
+    Dynamically build context
+    Query LLM
+    Evaluate completeness
+    Refine results if needed
 Progressive context expansion instead of full data injection
 Lightweight chat history compression
 API key rotation for handling rate limits
