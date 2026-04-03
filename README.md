@@ -1,7 +1,7 @@
 # 🚀 BioMed Advanced RAG Chatbot
 
-An **advanced Retrieval-Augmented Generation (RAG) system** designed for accurate question answering over biomedical documents.  
-Unlike traditional RAG pipelines, this system implements **iterative retrieval, self-correction, and context-aware reasoning** to improve answer quality in real-world scenarios.
+An **enhanced Retrieval-Augmented Generation system** designed for accurate question answering over biomedical documents.  
+Unlike traditional RAG pipelines, this system implements **iterative retrieval, self-correction, and context-aware response refinement** to improve answer quality in real-world scenarios.
 ---
 🖼️ Demo
 ---
@@ -9,7 +9,7 @@ Unlike traditional RAG pipelines, this system implements **iterative retrieval, 
 <img width="1280" height="721" alt="image" src="https://github.com/user-attachments/assets/c1d4a13e-facf-44e6-bb15-3b40dafab1a2" />
 
 ## 🎯 Overview
-This project goes beyond basic RAG by introducing a **hybrid intelligent retrieval pipeline** that can:
+This project goes beyond basic RAG by introducing a **enhanced retrieval pipeline** that can:
 - Evaluate its own answers  
 - Dynamically refine search queries  
 - Expand context progressively  
