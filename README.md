@@ -126,15 +126,6 @@ User Query
 6. Repeat until answer is complete  
 
 ---
-
-## ⚠️ Challenges & Limitations
-
-- Iterative loops may require constraints (max iterations)  
-- Limited understanding of very small icons or symbolic images  
-- Performance depends on chunk quality and embedding relevance  
-
----
-
 ## 💡 Key Learnings
 
 - Designing **self-correcting AI systems**  
