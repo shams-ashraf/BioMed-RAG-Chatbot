@@ -1,21 +1,12 @@
----
-🚀 BioMed RAG Chatbot
----
+# 🚀 BioMed Advanced RAG Chatbot
 
-An AI-powered document-based chatbot built using Retrieval-Augmented Generation (RAG). The system enables users to ask questions and receive accurate answers directly from official documents such as academic regulations and course materials.
-
+An **advanced Retrieval-Augmented Generation (RAG) system** designed for accurate question answering over biomedical documents.  
+Unlike traditional RAG pipelines, this system implements **iterative retrieval, self-correction, and context-aware reasoning** to improve answer quality in real-world scenarios.
 ---
 🖼️ Demo
 ---
 
 <img width="1280" height="721" alt="image" src="https://github.com/user-attachments/assets/c1d4a13e-facf-44e6-bb15-3b40dafab1a2" />
-
-# 🚀 BioMed Advanced RAG Chatbot
-
-An **advanced Retrieval-Augmented Generation (RAG) system** designed for accurate question answering over biomedical documents.  
-Unlike traditional RAG pipelines, this system implements **iterative retrieval, self-correction, and context-aware reasoning** to improve answer quality in real-world scenarios.
-
----
 
 ## 🎯 Overview
 This project goes beyond basic RAG by introducing a **hybrid intelligent retrieval pipeline** that can:
